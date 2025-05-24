@@ -1,5 +1,9 @@
 package shortener
 
+import (
+	"fmt"
+)
+
 type SingleThreadedShortener struct {
 	urls map[string]string
 }
@@ -19,6 +23,8 @@ func (s *SingleThreadedShortener) Shorten(longURL string) (string, error) {
 }
 
 func (s *SingleThreadedShortener) Expand(shortURL string) (string, error) {
-	// TODO: implement me
-	return shortURL, nil
+	if dest, found := s.urls[shortURL]; found {
+		return dest, nil
+	}
+	return "", fmt.Errorf("short URL not found")
 }
