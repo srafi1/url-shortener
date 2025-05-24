@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -19,8 +20,21 @@ func main() {
 	log.Println("URL shortener is running...")
 	log.Printf("Listening at: %s", LISTEN_ADDR)
 
-	router := routing.GetRouter()
+	s := &shortenerImpl{}
+	router := routing.GetRouter(s)
 	if err := http.ListenAndServe(LISTEN_ADDR, router); err != nil {
-		log.Printf("failed to serve http: %w", err)
+		log.Printf("failed to serve http: %s", err.Error())
 	}
+}
+
+type shortenerImpl struct{}
+
+// Expand implements shortener.UrlShortener.
+func (s *shortenerImpl) Expand(shortenedUrl string) (string, error) {
+	return "", fmt.Errorf("unimplemented")
+}
+
+// Shorten implements shortener.UrlShortener.
+func (s *shortenerImpl) Shorten(url string) (string, error) {
+	return "", fmt.Errorf("unimplemented")
 }
