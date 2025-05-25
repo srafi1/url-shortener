@@ -22,6 +22,7 @@ func (s *SingleThreadedShortener) Shorten(longURL string) (string, error) {
 	for retries := 5; retries > 0; retries -= 1 {
 		short := generateFriendlyID()
 		if _, found := s.urls[short]; !found {
+			s.urls[short] = longURL
 			return short, nil
 		}
 	}
