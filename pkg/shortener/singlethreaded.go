@@ -7,7 +7,7 @@ import (
 
 type SingleThreadedShortener struct {
 	urls map[string]string
-	mu   sync.Mutex
+	mu   sync.RWMutex
 }
 
 // validate we've implemented the UrlShortener interface
@@ -36,6 +36,9 @@ func (s *SingleThreadedShortener) Shorten(longURL string) (string, error) {
 }
 
 func (s *SingleThreadedShortener) Expand(shortURL string) (string, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
 	if dest, found := s.urls[shortURL]; found {
 		return dest, nil
 	}
