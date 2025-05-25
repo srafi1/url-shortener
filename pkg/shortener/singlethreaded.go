@@ -2,10 +2,12 @@ package shortener
 
 import (
 	"fmt"
+	"sync"
 )
 
 type SingleThreadedShortener struct {
 	urls map[string]string
+	mu   sync.Mutex
 }
 
 // validate we've implemented the UrlShortener interface
@@ -18,6 +20,9 @@ func NewSingleThreadedShortener() *SingleThreadedShortener {
 }
 
 func (s *SingleThreadedShortener) Shorten(longURL string) (string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	// NOTE: a better check for saturation is the count of active URLs vs the generateFriendlyID probability space
 	for retries := 5; retries > 0; retries -= 1 {
 		short := generateFriendlyID()
