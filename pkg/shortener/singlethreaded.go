@@ -18,8 +18,12 @@ func NewSingleThreadedShortener() *SingleThreadedShortener {
 }
 
 func (s *SingleThreadedShortener) Shorten(longURL string) (string, error) {
-	// TODO: implement me
-	return longURL, nil
+	for {
+		short := generateFriendlyID()
+		if _, found := s.urls[short]; !found {
+			return short, nil
+		}
+	}
 }
 
 func (s *SingleThreadedShortener) Expand(shortURL string) (string, error) {
