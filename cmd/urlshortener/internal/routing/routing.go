@@ -25,7 +25,21 @@ type Response struct {
 	Error        string `json:"error,omitempty"`
 }
 
-func ServeHello(w http.ResponseWriter, _ *http.Request) {
+func ServeHello(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		log.Printf("404: unmatched route for path=%s", r.URL.String())
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotFound)
+
+		response := Response{Error: "resource not found"}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Printf("failed to write response: %v", err)
+		}
+
+		return
+	}
+
 	response := "hello world"
 	if _, err := w.Write([]byte(response)); err != nil {
 		log.Printf("failed to write hello response: %s", err.Error())
