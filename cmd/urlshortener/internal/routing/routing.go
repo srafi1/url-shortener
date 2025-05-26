@@ -12,9 +12,10 @@ type handler func(http.ResponseWriter, *http.Request)
 
 func GetRouter(s shortener.UrlShortener) http.Handler {
 	mux := &http.ServeMux{}
-	mux.HandleFunc("/", ServeHello)
-	mux.HandleFunc("/shorten", ServeShorten(s))
-	mux.HandleFunc("/expand", ServeExpand(s))
+	mux.HandleFunc("/shorten/", ServeShorten(s)) // handles /shorten/<long>
+	mux.HandleFunc("/expand/", ServeExpand(s))   // handles /expand/<short>
+	mux.HandleFunc("/", ServeHello)              // fallback catch-all
+
 	return mux
 }
 
@@ -34,7 +35,8 @@ func ServeHello(w http.ResponseWriter, _ *http.Request) {
 func ServeShorten(s shortener.UrlShortener) handler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
-		originalUrl := r.URL.Query().Get("url")
+
+		originalUrl := r.URL.Path[len("/shorten/"):]
 		if originalUrl == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			response, _ := json.Marshal(Response{Error: "url not found in request"})
@@ -65,7 +67,8 @@ func ServeShorten(s shortener.UrlShortener) handler {
 func ServeExpand(s shortener.UrlShortener) handler {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
-		shortenedUrl := r.URL.Query().Get("url")
+
+		shortenedUrl := r.URL.Path[len("/expand/"):]
 		if shortenedUrl == "" {
 			w.WriteHeader(http.StatusBadRequest)
 			response, _ := json.Marshal(Response{Error: "url not found in request"})
