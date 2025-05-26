@@ -39,28 +39,21 @@ func ServeShorten(s shortener.UrlShortener) handler {
 		originalUrl := r.URL.Path[len("/shorten/"):]
 		if originalUrl == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			response, _ := json.Marshal(Response{Error: "url not found in request"})
-			if _, err := w.Write(response); err != nil {
-				log.Printf("failed to write error: %s", err.Error())
-			}
+			json.NewEncoder(w).Encode(Response{Error: "url not found in request"})
 			return
 		}
 
 		shortenedUrl, err := s.Shorten(originalUrl)
 		if err != nil {
-			log.Printf("failed to shorten url: %s", err.Error())
+			log.Printf("failed to shorten url: %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
-			response, _ := json.Marshal(Response{Error: "failed to shorten url"})
-			if _, werr := w.Write(response); werr != nil {
-				log.Printf("failed to write error: %s", werr.Error())
-			}
+			json.NewEncoder(w).Encode(Response{Error: "failed to shorten url"})
 			return
 		}
 
-		response, _ := json.Marshal(Response{OriginalUrl: originalUrl, ShortenedUrl: shortenedUrl})
-		if _, err := w.Write(response); err != nil {
-			log.Printf("failed to write shorten response: %s", err.Error())
-		}
+		json.NewEncoder(w).Encode(Response{
+			ShortenedUrl: shortenedUrl,
+		})
 	}
 }
 
@@ -71,27 +64,20 @@ func ServeExpand(s shortener.UrlShortener) handler {
 		shortenedUrl := r.URL.Path[len("/expand/"):]
 		if shortenedUrl == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			response, _ := json.Marshal(Response{Error: "url not found in request"})
-			if _, err := w.Write(response); err != nil {
-				log.Printf("failed to write error: %s", err.Error())
-			}
+			json.NewEncoder(w).Encode(Response{Error: "url not found in request"})
 			return
 		}
 
 		originalUrl, err := s.Expand(shortenedUrl)
 		if err != nil {
-			log.Printf("failed to expand url: %s", err.Error())
+			log.Printf("failed to expand url: %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
-			response, _ := json.Marshal(Response{Error: "failed to expand url"})
-			if _, werr := w.Write(response); werr != nil {
-				log.Printf("failed to write error: %s", werr.Error())
-			}
+			json.NewEncoder(w).Encode(Response{Error: "failed to shorten url"})
 			return
 		}
 
-		response, _ := json.Marshal(Response{OriginalUrl: originalUrl, ShortenedUrl: shortenedUrl})
-		if _, err := w.Write(response); err != nil {
-			log.Printf("failed to write expand response: %s", err.Error())
-		}
+		json.NewEncoder(w).Encode(Response{
+			OriginalUrl: originalUrl,
+		})
 	}
 }
