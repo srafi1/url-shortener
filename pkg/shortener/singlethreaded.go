@@ -13,7 +13,7 @@ type SingleThreadedShortener struct {
 // validate we've implemented the UrlShortener interface
 var _ UrlShortener = (*SingleThreadedShortener)(nil)
 
-func NewSingleThreadedShortener() *SingleThreadedShortener {
+func NewSingleThreadedShortener() UrlShortener {
 	return &SingleThreadedShortener{
 		urls: make(map[string]string),
 	}
