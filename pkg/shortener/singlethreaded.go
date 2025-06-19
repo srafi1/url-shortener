@@ -22,17 +22,7 @@ func NewSingleThreadedShortener() UrlShortener {
 func (s *SingleThreadedShortener) Shorten(longURL string) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	// NOTE: a better check for saturation is the count of active URLs vs the generateFriendlyID probability space
-	for retries := 5; retries > 0; retries -= 1 {
-		short := generateFriendlyID()
-		if _, found := s.urls[short]; !found {
-			s.urls[short] = longURL
-			return short, nil
-		}
-	}
-
-	return "", fmt.Errorf("memory is too saturated")
+	return generateAndAdd(s.urls, longURL)
 }
 
 func (s *SingleThreadedShortener) Expand(shortURL string) (string, error) {

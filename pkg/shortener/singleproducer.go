@@ -10,6 +10,9 @@ type SingleProducerShortener struct {
 	requests chan *request
 }
 
+// validate we've implemented the UrlShortener interface
+var _ UrlShortener = (*SingleProducerShortener)(nil)
+
 func NewSingleProducerShortener() UrlShortener {
 	s := &SingleProducerShortener{
 		urls:     map[string]string{},
@@ -37,23 +40,8 @@ func (s *SingleProducerShortener) startProducer() {
 
 func (s *SingleProducerShortener) handleRequest(r *request) {
 	defer r.wg.Done()
-
-	// NOTE: a better check for saturation is the count of active URLs vs the generateFriendlyID probability space
-	for retries := 5; retries > 0; retries -= 1 {
-		short := generateFriendlyID()
-		if _, found := s.urls[short]; !found {
-			s.urls[short] = r.s.key
-			r.s.val = short
-			return
-		}
-	}
-
-	r.s.err = fmt.Errorf("memory is too saturated")
-	return
+	r.s.val, r.s.err = generateAndAdd(s.urls, r.s.key)
 }
-
-// validate we've implemented the UrlShortener interface
-var _ UrlShortener = (*SingleProducerShortener)(nil)
 
 // Shorten implements UrlShortener.
 func (s *SingleProducerShortener) Shorten(url string) (string, error) {
