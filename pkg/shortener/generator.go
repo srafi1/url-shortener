@@ -74,3 +74,15 @@ func generateFriendlyID() string {
 	number := rng.Intn(100) // 0–99
 	return fmt.Sprintf("%s-%s-%02d", adj, animal, number)
 }
+
+func generateAndAdd(m map[string]string, longURL string) (string, error) {
+	// NOTE: a better check for saturation is the count of active URLs vs the generateFriendlyID probability space
+	for retries := 5; retries > 0; retries -= 1 {
+		short := generateFriendlyID()
+		if _, found := m[short]; !found {
+			m[short] = longURL
+			return short, nil
+		}
+	}
+	return "", fmt.Errorf("memory is too saturated")
+}
